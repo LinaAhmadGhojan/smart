@@ -31,7 +31,7 @@ export function Header() {
   const whatsappNumber = companyInfo?.contact.whatsapp || "971562566232";
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-gradient-to-r from-slate-900 to-blue-900 backdrop-blur-sm shadow-lg border-b border-cyan-500/20 z-50">
+    <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-md z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -41,10 +41,10 @@ export function Header() {
               className="h-12 w-12 object-contain"
             />
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-bold text-blue-900">
                 {companyInfo?.companyName || "SMARTFLOW"}
               </h1>
-              <p className="text-xs text-cyan-400">
+              <p className="text-xs text-gray-600">
                 {companyInfo?.tagline || "Your Home is Safe With Us"}
               </p>
             </div>
@@ -53,25 +53,25 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-6">
             <button
               onClick={() => scrollToSection("home")}
-              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
               الرئيسية | Home
             </button>
             <button
               onClick={() => scrollToSection("products")}
-              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
               المنتجات | Products
             </button>
             <button
               onClick={() => scrollToSection("about")}
-              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
               من نحن | About
             </button>
             <button
               onClick={() => scrollToSection("contact")}
-              className="text-gray-300 hover:text-cyan-400 font-medium transition-colors"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
               تواصل معنا | Contact
             </button>
@@ -87,7 +87,7 @@ export function Header() {
           </nav>
 
           <button
-            className="md:hidden text-white"
+            className="md:hidden text-gray-700"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,25 +100,25 @@ export function Header() {
           <nav className="md:hidden mt-4 pb-4 flex flex-col gap-3">
             <button
               onClick={() => scrollToSection("home")}
-              className="text-left text-gray-300 hover:text-cyan-400 font-medium py-2"
+              className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
               الرئيسية | Home
             </button>
             <button
               onClick={() => scrollToSection("products")}
-              className="text-left text-gray-300 hover:text-cyan-400 font-medium py-2"
+              className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
               المنتجات | Products
             </button>
             <button
               onClick={() => scrollToSection("about")}
-              className="text-left text-gray-300 hover:text-cyan-400 font-medium py-2"
+              className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
               من نحن | About
             </button>
             <button
               onClick={() => scrollToSection("contact")}
-              className="text-left text-gray-300 hover:text-cyan-400 font-medium py-2"
+              className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
               تواصل معنا | Contact
             </button>

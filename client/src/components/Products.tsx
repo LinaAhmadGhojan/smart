@@ -50,7 +50,7 @@ export function Products() {
 
   if (loading) {
     return (
-      <section id="products" className="py-20 bg-white">
+      <section id="products" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
           <div className="text-xl text-gray-600">جاري التحميل...</div>
         </div>
@@ -59,21 +59,21 @@ export function Products() {
   }
 
   return (
-    <section id="products" className="py-20 bg-white">
+    <section id="products" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
             منتجاتنا | Our Products
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            حلول متكاملة لأنظمة الطاقة والبيوت الذكية والبوابات الأوتوماتيكية
+            حلول متكاملة لأنظمة الطاقة والبيوت الذكية
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product) => (
-            <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-shadow border border-cyan-200">
-              <div className="relative h-64 bg-gradient-to-br from-slate-50 to-cyan-50 flex items-center justify-center">
+            <Card key={product.id} className="overflow-hidden hover:shadow-xl transition-shadow">
+              <div className="relative h-64 bg-white flex items-center justify-center">
                 <img
                   src={product.image}
                   alt={product.name}
