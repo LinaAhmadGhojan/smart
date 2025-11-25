@@ -1,0 +1,100 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "NICE THOR 1500 KG",
+      "nameAr": "موتور بوابة منزلقة",
+      "brand": "NICE",
+      "price": "2,000.00 AED",
+      "image": "/product-gate-motor.jpeg",
+      "inStock": true,
+      "features": [
+        "Sliding Gate Motor in Dubai, UAE",
+        "1500 kg load capacity",
+        "Electromechanical limit switch",
+        "Integrated control unit"
+      ],
+      "whatsappMessage": "مرحباً، أنا مهتم بمنتج NICE THOR 1500 KG موتور بوابة منزلقة"
+    },
+    {
+      "id": 2,
+      "name": "Automatic Gate System",
+      "nameAr": "نظام بوابة أوتوماتيكي",
+      "brand": "SmartFlow",
+      "price": "3,500.00 AED",
+      "image": "/smartflow-logo.jpeg",
+      "inStock": true,
+      "features": [
+        "Complete automation solution",
+        "Remote control access",
+        "Safety sensors included",
+        "Professional installation"
+      ],
+      "whatsappMessage": "مرحباً، أنا مهتم بنظام البوابة الأوتوماتيكي"
+    },
+    {
+      "id": 3,
+      "name": "Smart Home Controller",
+      "nameAr": "جهاز تحكم ذكي للمنزل",
+      "brand": "SmartFlow",
+      "price": "1,800.00 AED",
+      "image": "/smartflow-logo.jpeg",
+      "inStock": true,
+      "features": [
+        "Full home automation control",
+        "Energy management system",
+        "Voice command compatible",
+        "Mobile app integration"
+      ],
+      "whatsappMessage": "مرحباً، أنا مهتم بجهاز التحكم الذكي للمنزل"
+    },
+    {
+      "id": 4,
+      "name": "Power Distribution Panel",
+      "nameAr": "لوحة توزيع كهربائية",
+      "brand": "SmartFlow",
+      "price": "2,500.00 AED",
+      "image": "/smartflow-logo.jpeg",
+      "inStock": true,
+      "features": [
+        "Smart power distribution",
+        "Circuit protection system",
+        "Real-time monitoring",
+        "Safe and certified"
+      ],
+      "whatsappMessage": "مرحباً، أنا مهتم بلوحة التوزيع الكهربائية"
+    },
+    {
+      "id": 5,
+      "name": "Energy Control System",
+      "nameAr": "نظام التحكم بالطاقة",
+      "brand": "SmartFlow",
+      "price": "4,200.00 AED",
+      "image": "/smartflow-logo.jpeg",
+      "inStock": true,
+      "features": [
+        "Energy consumption monitoring",
+        "Automated power management",
+        "Cost optimization",
+        "Cloud-based analytics"
+      ],
+      "whatsappMessage": "مرحباً، أنا مهتم بنظام التحكم بالطاقة"
+    },
+    {
+      "id": 6,
+      "name": "Smart Lighting System",
+      "nameAr": "نظام إضاءة ذكي",
+      "brand": "SmartFlow",
+      "price": "1,500.00 AED",
+      "image": "/smartflow-logo.jpeg",
+      "inStock": true,
+      "features": [
+        "Automated lighting control",
+        "Energy efficient LED",
+        "Programmable schedules",
+        "Remote access"
+      ],
+      "whatsappMessage": "مرحباً، أنا مهتم بنظام الإضاءة الذكي"
+    }
+  ]
+}

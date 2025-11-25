@@ -1,8 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
+
+interface CompanyInfo {
+  companyName: string;
+  tagline: string;
+  contact: {
+    whatsapp: string;
+  };
+}
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo | null>(null);
+
+  useEffect(() => {
+    fetch('/company-info.json')
+      .then(res => res.json())
+      .then(data => setCompanyInfo(data))
+      .catch(error => console.error('Error loading company info:', error));
+  }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -11,6 +27,8 @@ export function Header() {
       setIsMenuOpen(false);
     }
   };
+
+  const whatsappNumber = companyInfo?.contact.whatsapp || "971562566232";
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-md z-50">
@@ -23,8 +41,12 @@ export function Header() {
               className="h-12 w-12 object-contain"
             />
             <div>
-              <h1 className="text-2xl font-bold text-blue-900">SMARTFLOW</h1>
-              <p className="text-xs text-gray-600">Your Home is Safe With Us</p>
+              <h1 className="text-2xl font-bold text-blue-900">
+                {companyInfo?.companyName || "SMARTFLOW"}
+              </h1>
+              <p className="text-xs text-gray-600">
+                {companyInfo?.tagline || "Your Home is Safe With Us"}
+              </p>
             </div>
           </div>
 
@@ -33,28 +55,28 @@ export function Header() {
               onClick={() => scrollToSection("home")}
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
-              Home
+              الرئيسية | Home
             </button>
             <button
               onClick={() => scrollToSection("products")}
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
-              Products
+              المنتجات | Products
             </button>
             <button
               onClick={() => scrollToSection("about")}
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
-              About Us
+              من نحن | About
             </button>
             <button
               onClick={() => scrollToSection("contact")}
               className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
             >
-              Contact
+              تواصل معنا | Contact
             </button>
             <Button
-              onClick={() => window.open("https://wa.me/971501234567", "_blank")}
+              onClick={() => window.open(`https://wa.me/${whatsappNumber}`, "_blank")}
               className="bg-green-600 hover:bg-green-700"
             >
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -80,25 +102,25 @@ export function Header() {
               onClick={() => scrollToSection("home")}
               className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
-              Home
+              الرئيسية | Home
             </button>
             <button
               onClick={() => scrollToSection("products")}
               className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
-              Products
+              المنتجات | Products
             </button>
             <button
               onClick={() => scrollToSection("about")}
               className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
-              About Us
+              من نحن | About
             </button>
             <button
               onClick={() => scrollToSection("contact")}
               className="text-left text-gray-700 hover:text-blue-600 font-medium py-2"
             >
-              Contact
+              تواصل معنا | Contact
             </button>
           </nav>
         )}
