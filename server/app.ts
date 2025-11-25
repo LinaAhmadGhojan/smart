@@ -74,11 +74,12 @@ export default async function runApp(
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client
   const port = 5000;
+  const host = process.platform === 'win32' ? 'localhost' : '0.0.0.0';
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host,
+    reusePort: false,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`serving on http://${host}:${port}`);
   });
 }
