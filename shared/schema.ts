@@ -2,6 +2,13 @@ import { pgTable, text, serial, integer, boolean, timestamp, varchar, decimal } 
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const admins = pgTable("admins", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -33,6 +40,11 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const insertAdminSchema = createInsertSchema(admins).pick({
+  email: true,
+  password: true,
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
@@ -49,6 +61,8 @@ export const insertProductSchema = createInsertSchema(products).omit({
   updatedAt: true,
 });
 
+export type InsertAdmin = z.infer<typeof insertAdminSchema>;
+export type Admin = typeof admins.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;

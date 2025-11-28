@@ -11,7 +11,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isRegister, setIsRegister] = useState(false);
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -23,8 +22,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     setError("");
 
     try {
-      const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -37,14 +35,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         return;
       }
 
-      if (isRegister) {
-        setError("");
-        setEmail("");
-        setPassword("");
-        setIsRegister(false);
-        alert("تم إنشاء الحساب بنجاح! يرجى تسجيل الدخول الآن");
-      } else {
+      if (data.isAdmin) {
         onLogin(email, data.userId);
+      } else {
+        setError("هذا الحساب ليس بحساب إدمن!");
       }
     } catch (err) {
       setError("خطأ في الاتصال بالخادم");
@@ -58,7 +52,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="bg-blue-900 text-white rounded-t-lg">
           <CardTitle className="text-3xl text-center">
-            {isRegister ? "📝 إنشاء حساب" : "🔐 تسجيل الدخول"}
+            🔐 تسجيل الدخول - لوحة التحكم
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-8 space-y-6">
@@ -104,25 +98,15 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-lg font-bold"
           >
-            {loading ? "جاري المعالجة..." : isRegister ? "إنشاء الحساب" : "دخول"}
+            {loading ? "جاري المعالجة..." : "دخول"}
           </Button>
 
-          <div className="text-center pt-4 border-t">
-            <button
-              onClick={() => {
-                setIsRegister(!isRegister);
-                setError("");
-                setEmail("");
-                setPassword("");
-              }}
-              className="text-blue-600 hover:text-blue-800 font-semibold"
-            >
-              {isRegister ? "هل لديك حساب؟ سجل دخول" : "ليس لديك حساب؟ إنشاء حساب"}
-            </button>
-          </div>
-
-          <div className="text-center pt-2 text-xs text-gray-500">
-            <p>📧 استخدم أي بريد إلكتروني وكلمة سر آمنة</p>
+          <div className="text-center pt-6 border-t-2 space-y-3">
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <p className="font-bold text-blue-900 mb-2">🔐 بيانات الإدمن الافتراضية:</p>
+              <p className="text-sm text-gray-700">📧 <span className="font-mono bg-gray-200 px-2 py-1 rounded">admin@smartflow.com</span></p>
+              <p className="text-sm text-gray-700">🔑 <span className="font-mono bg-gray-200 px-2 py-1 rounded">SmartFlow123!</span></p>
+            </div>
           </div>
         </CardContent>
       </Card>

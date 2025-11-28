@@ -1,74 +1,28 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
-import { readFileSync, writeFileSync } from "fs";
-import { join } from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = join(fileURLToPath(import.meta.url), "..", "..", "..");
-const usersFilePath = join(__dirname, "data", "users.json");
 
 const router = Router();
 
-// Ensure data directory exists
-import { mkdirSync } from "fs";
-try {
-  mkdirSync(join(__dirname, "data"), { recursive: true });
-} catch (e) {}
+// Mock admins data - in production this would use database
+let admins: any[] = [];
 
-// Helper to read users from JSON
-function getUsers() {
-  try {
-    if (!require("fs").existsSync(usersFilePath)) {
-      return [];
-    }
-    const data = readFileSync(usersFilePath, "utf-8");
-    return JSON.parse(data) || [];
-  } catch {
-    return [];
+// Initialize with default admin
+async function initializeAdmin() {
+  if (admins.length === 0) {
+    const hashedPassword = await bcrypt.hash("SmartFlow123!", 10);
+    admins = [
+      {
+        id: 1,
+        email: "admin@smartflow.com",
+        password: hashedPassword,
+      }
+    ];
   }
 }
 
-// Helper to save users to JSON
-function saveUsers(users: any[]) {
-  try {
-    writeFileSync(usersFilePath, JSON.stringify(users, null, 2));
-  } catch (error) {
-    console.error("Error saving users:", error);
-  }
-}
+initializeAdmin();
 
-// Register endpoint
-router.post("/register", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: "البريد وكلمة السر مطلوبة" });
-    }
-
-    const users = getUsers();
-    if (users.some((u: any) => u.email === email)) {
-      return res.status(400).json({ error: "هذا البريد مسجل بالفعل" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = {
-      id: Math.max(...users.map((u: any) => u.id || 0), 0) + 1,
-      email,
-      password: hashedPassword,
-      createdAt: new Date().toISOString(),
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    res.json({ success: true, message: "تم إنشاء الحساب بنجاح" });
-  } catch (error) {
-    res.status(500).json({ error: "خطأ في التسجيل" });
-  }
-});
-
-// Login endpoint
+// Admin Login endpoint
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -77,22 +31,54 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "البريد وكلمة السر مطلوبة" });
     }
 
-    const users = getUsers();
-    const user = users.find((u: any) => u.email === email);
+    const admin = admins.find((a) => a.email === email);
 
-    if (!user) {
+    if (!admin) {
       return res.status(401).json({ error: "البريد أو كلمة السر غير صحيحة" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ error: "البريد أو كلمة السر غير صحيحة" });
     }
 
-    res.json({ success: true, userId: user.id, email: user.email });
+    res.json({ success: true, userId: admin.id, email: admin.email, isAdmin: true });
   } catch (error) {
     res.status(500).json({ error: "خطأ في الدخول" });
+  }
+});
+
+// Admin Register endpoint (for adding new admins)
+router.post("/register-admin", async (req, res) => {
+  try {
+    const { email, password, adminKey } = req.body;
+
+    // Simple check - in production use proper authorization
+    if (adminKey !== "ADMIN_SECRET_KEY") {
+      return res.status(403).json({ error: "غير مصرح" });
+    }
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "البريد وكلمة السر مطلوبة" });
+    }
+
+    if (admins.some((a) => a.email === email)) {
+      return res.status(400).json({ error: "هذا البريد مسجل بالفعل" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newAdmin = {
+      id: Math.max(...admins.map((a) => a.id || 0), 0) + 1,
+      email,
+      password: hashedPassword,
+    };
+
+    admins.push(newAdmin);
+
+    res.json({ success: true, message: "تم إنشاء حساب الإدمن بنجاح" });
+  } catch (error) {
+    res.status(500).json({ error: "خطأ في التسجيل" });
   }
 });
 
