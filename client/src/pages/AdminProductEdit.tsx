@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Header } from "../components/Header";
@@ -12,8 +12,15 @@ interface Product {
   price: string;
   image: string;
   inStock: boolean;
+  categoryId?: number;
   features: string[];
   whatsappMessage: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  nameAr: string;
 }
 
 interface AdminProductEditProps {
@@ -32,16 +39,72 @@ export function AdminProductEdit({ product, onBack, onSave, onLogout }: AdminPro
       price: "",
       image: "",
       inStock: true,
+      categoryId: undefined,
       features: [],
       whatsappMessage: "",
     }
   );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(formData.image || "");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      const data = await res.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave(formData);
+      let imageUrl = formData.image;
+
+      // Upload image if a new file was selected
+      if (selectedFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append("image", selectedFile);
+        try {
+          const uploadRes = await fetch("/api/products/upload", {
+            method: "POST",
+            body: uploadFormData,
+          });
+          const uploadData = await uploadRes.json();
+          imageUrl = uploadData.image;
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          alert("خطأ في رفع الصورة!");
+          setSaving(false);
+          return;
+        }
+      }
+
+      const productToSave = {
+        ...formData,
+        image: imageUrl,
+      };
+
+      await onSave(productToSave);
     } finally {
       setSaving(false);
     }
@@ -119,22 +182,48 @@ export function AdminProductEdit({ product, onBack, onSave, onLogout }: AdminPro
                 />
               </div>
 
-              {/* Image URL */}
+              {/* Category */}
               <div>
                 <label className="block font-bold mb-2 text-blue-900">
-                  رابط الصورة
+                  الفئة
+                </label>
+                <select
+                  value={formData.categoryId || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      categoryId: e.target.value ? parseInt(e.target.value) : undefined,
+                    })
+                  }
+                  className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">-- اختر فئة (اختياري) --</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.nameAr} ({cat.name})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Image File Upload */}
+              <div>
+                <label className="block font-bold mb-2 text-blue-900">
+                  📷 الصورة
                 </label>
                 <input
-                  type="text"
-                  placeholder="/smartflow-logo.jpeg"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
                   className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 />
-                {formData.image && (
+                <p className="text-sm text-gray-500 mt-2">
+                  {selectedFile ? `✓ تم اختيار: ${selectedFile.name}` : "اختر ملف صورة"}
+                </p>
+                {imagePreview && (
                   <div className="mt-3 p-3 bg-gray-100 rounded-lg">
                     <img
-                      src={formData.image}
+                      src={imagePreview}
                       alt="Preview"
                       className="max-w-full h-40 object-cover rounded"
                     />

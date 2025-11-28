@@ -21,6 +21,7 @@ interface Product {
   price: string;
   image: string;
   inStock: boolean;
+  categoryId?: number;
   features: string[];
   whatsappMessage: string;
 }
