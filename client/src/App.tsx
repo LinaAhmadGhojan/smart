@@ -40,15 +40,29 @@ function App() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  // Check URL on mount
+  // Check URL on mount and route accordingly
   useEffect(() => {
     const pathName = window.location.pathname;
-    if (pathName.includes("/admin")) {
-      // Check if already logged in (in session)
-      const logged = sessionStorage.getItem("adminLoggedIn");
+    const logged = sessionStorage.getItem("adminLoggedIn");
+
+    if (pathName === "/admin" || pathName === "/admin/") {
       if (logged) {
         setIsLoggedIn(true);
         setAdminPage("dashboard");
+      } else {
+        setAdminPage("login");
+      }
+    } else if (pathName === "/admin/products") {
+      if (logged) {
+        setIsLoggedIn(true);
+        setAdminPage("products");
+      } else {
+        setAdminPage("login");
+      }
+    } else if (pathName === "/admin/categories") {
+      if (logged) {
+        setIsLoggedIn(true);
+        setAdminPage("categories");
       } else {
         setAdminPage("login");
       }
@@ -69,6 +83,14 @@ function App() {
 
   const handleSelectPage = (page: string) => {
     setAdminPage(page as AdminPage);
+    // Update URL
+    if (page === "dashboard") {
+      window.history.pushState({}, "", "/admin");
+    } else if (page === "products") {
+      window.history.pushState({}, "", "/admin/products");
+    } else if (page === "categories") {
+      window.history.pushState({}, "", "/admin/categories");
+    }
   };
 
   const handleEditProduct = (product: Product) => {
@@ -92,6 +114,7 @@ function App() {
         });
       }
       setAdminPage("products");
+      window.history.pushState({}, "", "/admin/products");
       setEditingProduct(null);
     } catch (error) {
       console.error("Error saving product:", error);
@@ -119,6 +142,7 @@ function App() {
         });
       }
       setAdminPage("categories");
+      window.history.pushState({}, "", "/admin/categories");
       setEditingCategory(null);
     } catch (error) {
       console.error("Error saving category:", error);
