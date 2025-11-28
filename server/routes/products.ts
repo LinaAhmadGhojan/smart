@@ -1,7 +1,36 @@
 import { Router } from "express";
-import { db } from "../db";
-import { products, categories, insertProductSchema, insertCategorySchema } from "@shared/schema";
+import { products, categories, insertProductSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import type { InferSelectModel } from "drizzle-orm";
+
+// Mock db for now - will be replaced with real db
+let mockProducts: typeof products.$inferSelect[] = [];
+
+const db = {
+  select: () => ({
+    from: (table: any) => {
+      if (table === products) {
+        return { where: (condition: any) => Promise.resolve([]), execute: () => Promise.resolve(mockProducts) };
+      }
+      return { execute: () => Promise.resolve([]) };
+    }
+  }),
+  insert: (table: any) => ({
+    values: (values: any) => ({
+      returning: () => Promise.resolve([{ ...values, id: Date.now() }])
+    })
+  }),
+  update: (table: any) => ({
+    set: (values: any) => ({
+      where: (condition: any) => ({
+        returning: () => Promise.resolve([values])
+      })
+    })
+  }),
+  delete: (table: any) => ({
+    where: (condition: any) => Promise.resolve(null)
+  })
+};
 
 const router = Router();
 

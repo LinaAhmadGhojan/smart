@@ -1,7 +1,35 @@
 import { Router } from "express";
-import { db } from "../db";
 import { categories, insertCategorySchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
+
+// Mock db for now
+let mockCategories: typeof categories.$inferSelect[] = [];
+
+const db = {
+  select: () => ({
+    from: (table: any) => {
+      if (table === categories) {
+        return { execute: () => Promise.resolve(mockCategories) };
+      }
+      return { execute: () => Promise.resolve([]) };
+    }
+  }),
+  insert: (table: any) => ({
+    values: (values: any) => ({
+      returning: () => Promise.resolve([{ ...values, id: Date.now() }])
+    })
+  }),
+  update: (table: any) => ({
+    set: (values: any) => ({
+      where: (condition: any) => ({
+        returning: () => Promise.resolve([values])
+      })
+    })
+  }),
+  delete: (table: any) => ({
+    where: (condition: any) => Promise.resolve(null)
+  })
+};
 
 const router = Router();
 

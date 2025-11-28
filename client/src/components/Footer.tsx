@@ -70,6 +70,11 @@ export function Footer() {
               <li>
                 <a href="#contact" className="hover:text-white transition-colors">تواصل معنا | Contact</a>
               </li>
+              <li>
+                <a href="/admin/products" className="hover:text-green-400 transition-colors font-semibold">
+                  🔑 إدارة المنتجات | Manage
+                </a>
+              </li>
             </ul>
           </div>
 
