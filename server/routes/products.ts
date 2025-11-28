@@ -1,43 +1,37 @@
 import { Router } from "express";
-import { products, categories, insertProductSchema } from "@shared/schema";
-import { eq } from "drizzle-orm";
-import type { InferSelectModel } from "drizzle-orm";
+import { readFileSync, writeFileSync } from "fs";
+import { join } from "path";
+import { fileURLToPath } from "url";
 
-// Mock db for now - will be replaced with real db
-let mockProducts: typeof products.$inferSelect[] = [];
-
-const db = {
-  select: () => ({
-    from: (table: any) => {
-      if (table === products) {
-        return { where: (condition: any) => Promise.resolve([]), execute: () => Promise.resolve(mockProducts) };
-      }
-      return { execute: () => Promise.resolve([]) };
-    }
-  }),
-  insert: (table: any) => ({
-    values: (values: any) => ({
-      returning: () => Promise.resolve([{ ...values, id: Date.now() }])
-    })
-  }),
-  update: (table: any) => ({
-    set: (values: any) => ({
-      where: (condition: any) => ({
-        returning: () => Promise.resolve([values])
-      })
-    })
-  }),
-  delete: (table: any) => ({
-    where: (condition: any) => Promise.resolve(null)
-  })
-};
+const __dirname = join(fileURLToPath(import.meta.url), "..", "..", "..");
+const productsFilePath = join(__dirname, "client", "public", "products.json");
 
 const router = Router();
+
+// Helper to read products from JSON
+function getProducts() {
+  try {
+    const data = readFileSync(productsFilePath, "utf-8");
+    const parsed = JSON.parse(data);
+    return parsed.products || [];
+  } catch {
+    return [];
+  }
+}
+
+// Helper to save products to JSON
+function saveProducts(products: any[]) {
+  try {
+    writeFileSync(productsFilePath, JSON.stringify({ products }, null, 2));
+  } catch (error) {
+    console.error("Error saving products:", error);
+  }
+}
 
 // Get all products
 router.get("/", async (req, res) => {
   try {
-    const allProducts = await db.select().from(products);
+    const allProducts = getProducts();
     res.json({ products: allProducts });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch products" });
@@ -47,11 +41,12 @@ router.get("/", async (req, res) => {
 // Get product by ID
 router.get("/:id", async (req, res) => {
   try {
-    const product = await db.select().from(products).where(eq(products.id, parseInt(req.params.id)));
-    if (!product.length) {
+    const allProducts = getProducts();
+    const product = allProducts.find((p: any) => p.id === parseInt(req.params.id));
+    if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-    res.json(product[0]);
+    res.json(product);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch product" });
   }
@@ -60,9 +55,15 @@ router.get("/:id", async (req, res) => {
 // Create product
 router.post("/", async (req, res) => {
   try {
-    const validated = insertProductSchema.parse(req.body);
-    const newProduct = await db.insert(products).values(validated).returning();
-    res.json(newProduct[0]);
+    const allProducts = getProducts();
+    const newProduct = {
+      id: Math.max(...allProducts.map((p: any) => p.id || 0), 0) + 1,
+      ...req.body,
+      features: req.body.features || [],
+    };
+    allProducts.push(newProduct);
+    saveProducts(allProducts);
+    res.json(newProduct);
   } catch (error) {
     res.status(400).json({ error: "Invalid product data" });
   }
@@ -71,13 +72,14 @@ router.post("/", async (req, res) => {
 // Update product
 router.put("/:id", async (req, res) => {
   try {
-    const validated = insertProductSchema.partial().parse(req.body);
-    const updated = await db
-      .update(products)
-      .set({ ...validated, updatedAt: new Date() })
-      .where(eq(products.id, parseInt(req.params.id)))
-      .returning();
-    res.json(updated[0]);
+    const allProducts = getProducts();
+    const index = allProducts.findIndex((p: any) => p.id === parseInt(req.params.id));
+    if (index === -1) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    allProducts[index] = { ...allProducts[index], ...req.body, id: parseInt(req.params.id) };
+    saveProducts(allProducts);
+    res.json(allProducts[index]);
   } catch (error) {
     res.status(400).json({ error: "Invalid product data" });
   }
@@ -86,7 +88,9 @@ router.put("/:id", async (req, res) => {
 // Delete product
 router.delete("/:id", async (req, res) => {
   try {
-    await db.delete(products).where(eq(products.id, parseInt(req.params.id)));
+    let allProducts = getProducts();
+    allProducts = allProducts.filter((p: any) => p.id !== parseInt(req.params.id));
+    saveProducts(allProducts);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete product" });
