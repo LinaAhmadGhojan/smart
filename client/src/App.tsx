@@ -69,9 +69,11 @@ function App() {
     }
   }, []);
 
-  const handleLogin = (password: string) => {
+  const handleLogin = (email: string, userId: number) => {
     setIsLoggedIn(true);
     sessionStorage.setItem("adminLoggedIn", "true");
+    sessionStorage.setItem("userEmail", email);
+    sessionStorage.setItem("userId", userId.toString());
     setAdminPage("dashboard");
   };
 
