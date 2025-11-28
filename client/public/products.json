@@ -6,7 +6,7 @@
       "nameAr": "موتور بوابة منزلقة",
       "brand": "NICE",
       "price": "2,000.00 AED",
-      "image": "/product-gate-motor.jpeg",
+      "image": "/uploads/products/1764339819674-foo0ko.jpeg",
       "inStock": true,
       "features": [
         "Sliding Gate Motor in Dubai, UAE",
@@ -14,7 +14,8 @@
         "Electromechanical limit switch",
         "Integrated control unit"
       ],
-      "whatsappMessage": "مرحباً، أنا مهتم بمنتج NICE THOR 1500 KG موتور بوابة منزلقة"
+      "whatsappMessage": "مرحباً، أنا مهتم بمنتج NICE THOR 1500 KG موتور بوابة منزلقة",
+      "categoryId": 2
     },
     {
       "id": 2,
@@ -95,17 +96,6 @@
         "Remote access"
       ],
       "whatsappMessage": "مرحباً، أنا مهتم بنظام الإضاءة الذكي"
-    },
-    {
-      "id": 7,
-      "name": "فثسق",
-      "nameAr": "فثسق",
-      "brand": "فثسق",
-      "price": "50000",
-      "image": "",
-      "inStock": true,
-      "features": [],
-      "whatsappMessage": "للبلا"
     }
   ]
 }
