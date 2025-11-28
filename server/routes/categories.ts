@@ -1,57 +1,75 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
+import { db } from "../db";
+import { categories } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
-// Mock data for categories
-let categories: any[] = [
-  { id: 1, name: "Gates", nameAr: "البوابات" },
-  { id: 2, name: "Smart Home", nameAr: "المنزل الذكي" },
-  { id: 3, name: "Security", nameAr: "الأمان" },
-];
-
 // Get all categories
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    res.json(categories);
+    const allCategories = await db.select().from(categories);
+    res.json(allCategories);
   } catch (error) {
+    console.error("Error fetching categories:", error);
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 });
 
 // Create category
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const newCategory = {
-      id: Math.max(...categories.map(c => c.id || 0), 0) + 1,
-      ...req.body,
-    };
-    categories.push(newCategory);
-    res.json(newCategory);
+    const { name, nameAr, description } = req.body;
+
+    if (!name || !nameAr) {
+      return res.status(400).json({ error: "Name and Arabic name are required" });
+    }
+
+    const newCategory = await db
+      .insert(categories)
+      .values({ name, nameAr, description })
+      .returning();
+
+    res.json(newCategory[0]);
   } catch (error) {
+    console.error("Error creating category:", error);
     res.status(400).json({ error: "Invalid category data" });
   }
 });
 
 // Update category
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req: Request, res: Response) => {
   try {
-    const index = categories.findIndex(c => c.id === parseInt(req.params.id));
-    if (index === -1) {
+    const categoryId = parseInt(req.params.id);
+    const { name, nameAr, description } = req.body;
+
+    const updated = await db
+      .update(categories)
+      .set({ name, nameAr, description })
+      .where(eq(categories.id, categoryId))
+      .returning();
+
+    if (updated.length === 0) {
       return res.status(404).json({ error: "Category not found" });
     }
-    categories[index] = { ...categories[index], ...req.body, id: parseInt(req.params.id) };
-    res.json(categories[index]);
+
+    res.json(updated[0]);
   } catch (error) {
+    console.error("Error updating category:", error);
     res.status(400).json({ error: "Invalid category data" });
   }
 });
 
 // Delete category
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    categories = categories.filter(c => c.id !== parseInt(req.params.id));
+    const categoryId = parseInt(req.params.id);
+
+    await db.delete(categories).where(eq(categories.id, categoryId));
+
     res.json({ success: true });
   } catch (error) {
+    console.error("Error deleting category:", error);
     res.status(500).json({ error: "Failed to delete category" });
   }
 });

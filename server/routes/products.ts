@@ -1,11 +1,13 @@
 import { Router, Request, Response } from "express";
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import multer, { Multer } from "multer";
+import { db } from "../db";
+import { products } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const __dirname = join(fileURLToPath(import.meta.url), "..", "..", "..");
-const productsFilePath = join(__dirname, "client", "public", "products.json");
 
 const router = Router();
 
@@ -28,26 +30,6 @@ const storage = multer.diskStorage({
 });
 const upload: Multer = multer({ storage });
 
-// Helper to read products from JSON
-function getProducts() {
-  try {
-    const data = readFileSync(productsFilePath, "utf-8");
-    const parsed = JSON.parse(data);
-    return parsed.products || [];
-  } catch {
-    return [];
-  }
-}
-
-// Helper to save products to JSON
-function saveProducts(products: any[]) {
-  try {
-    writeFileSync(productsFilePath, JSON.stringify({ products }, null, 2));
-  } catch (error) {
-    console.error("Error saving products:", error);
-  }
-}
-
 // Upload image endpoint
 router.post("/upload", upload.single("image"), (req: Request, res: Response) => {
   const file = (req as any).file;
@@ -58,70 +40,110 @@ router.post("/upload", upload.single("image"), (req: Request, res: Response) => 
 });
 
 // Get all products
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const allProducts = getProducts();
+    const allProducts = await db.select().from(products);
     res.json({ products: allProducts });
   } catch (error) {
+    console.error("Error fetching products:", error);
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 
 // Get product by ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const allProducts = getProducts();
-    const product = allProducts.find((p: any) => p.id === parseInt(req.params.id));
-    if (!product) {
+    const productId = parseInt(req.params.id);
+    const product = await db
+      .select()
+      .from(products)
+      .where(eq(products.id, productId));
+
+    if (product.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-    res.json(product);
+
+    res.json(product[0]);
   } catch (error) {
+    console.error("Error fetching product:", error);
     res.status(500).json({ error: "Failed to fetch product" });
   }
 });
 
 // Create product
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const allProducts = getProducts();
-    const newProduct = {
-      id: Math.max(...allProducts.map((p: any) => p.id || 0), 0) + 1,
-      ...req.body,
-      features: req.body.features || [],
-    };
-    allProducts.push(newProduct);
-    saveProducts(allProducts);
-    res.json(newProduct);
+    const { name, nameAr, brand, price, image, inStock, categoryId, features, whatsappMessage } = req.body;
+
+    if (!name || !nameAr || !price) {
+      return res.status(400).json({ error: "Name, Arabic name, and price are required" });
+    }
+
+    const newProduct = await db
+      .insert(products)
+      .values({
+        name,
+        nameAr,
+        brand,
+        price,
+        image,
+        inStock: inStock ?? true,
+        categoryId: categoryId ? parseInt(categoryId) : undefined,
+        features: features || [],
+        whatsappMessage,
+      })
+      .returning();
+
+    res.json(newProduct[0]);
   } catch (error) {
+    console.error("Error creating product:", error);
     res.status(400).json({ error: "Invalid product data" });
   }
 });
 
 // Update product
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req: Request, res: Response) => {
   try {
-    const allProducts = getProducts();
-    const index = allProducts.findIndex((p: any) => p.id === parseInt(req.params.id));
-    if (index === -1) {
+    const productId = parseInt(req.params.id);
+    const { name, nameAr, brand, price, image, inStock, categoryId, features, whatsappMessage } = req.body;
+
+    const updated = await db
+      .update(products)
+      .set({
+        name,
+        nameAr,
+        brand,
+        price,
+        image,
+        inStock,
+        categoryId: categoryId ? parseInt(categoryId) : undefined,
+        features,
+        whatsappMessage,
+      })
+      .where(eq(products.id, productId))
+      .returning();
+
+    if (updated.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-    allProducts[index] = { ...allProducts[index], ...req.body, id: parseInt(req.params.id) };
-    saveProducts(allProducts);
-    res.json(allProducts[index]);
+
+    res.json(updated[0]);
   } catch (error) {
+    console.error("Error updating product:", error);
     res.status(400).json({ error: "Invalid product data" });
   }
 });
 
 // Delete product
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    let allProducts = getProducts();
-    allProducts = allProducts.filter((p: any) => p.id !== parseInt(req.params.id));
-    saveProducts(allProducts);
+    const productId = parseInt(req.params.id);
+
+    await db.delete(products).where(eq(products.id, productId));
+
     res.json({ success: true });
   } catch (error) {
+    console.error("Error deleting product:", error);
     res.status(500).json({ error: "Failed to delete product" });
   }
 });
