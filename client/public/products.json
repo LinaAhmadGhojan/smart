@@ -95,6 +95,17 @@
         "Remote access"
       ],
       "whatsappMessage": "مرحباً، أنا مهتم بنظام الإضاءة الذكي"
+    },
+    {
+      "id": 7,
+      "name": "فثسق",
+      "nameAr": "فثسق",
+      "brand": "فثسق",
+      "price": "50000",
+      "image": "",
+      "inStock": true,
+      "features": [],
+      "whatsappMessage": "للبلا"
     }
   ]
 }
