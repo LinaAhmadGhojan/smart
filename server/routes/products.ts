@@ -2,11 +2,24 @@ import { Router } from "express";
 import { readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
+import multer from "multer";
 
 const __dirname = join(fileURLToPath(import.meta.url), "..", "..", "..");
 const productsFilePath = join(__dirname, "client", "public", "products.json");
 
 const router = Router();
+
+// Setup multer for file uploads
+const uploadsDir = join(__dirname, "client", "public", "uploads", "products");
+const storage = multer.diskStorage({
+  destination: uploadsDir,
+  filename: (req, file, cb) => {
+    const ext = file.originalname.split(".").pop();
+    const name = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    cb(null, name);
+  },
+});
+const upload = multer({ storage });
 
 // Helper to read products from JSON
 function getProducts() {
@@ -27,6 +40,14 @@ function saveProducts(products: any[]) {
     console.error("Error saving products:", error);
   }
 }
+
+// Upload image endpoint
+router.post("/upload", upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+  res.json({ image: `/uploads/products/${req.file.filename}` });
+});
 
 // Get all products
 router.get("/", async (req, res) => {
