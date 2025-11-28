@@ -39,14 +39,13 @@ export function Products() {
   const [displayCount, setDisplayCount] = useState(PRODUCTS_PER_PAGE);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  // Cache loaded state
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Load categories first (needed for mapping)
+        // Load categories
         const categoriesRes = await fetch('/api/categories');
-        const categoriesData = Array.isArray(await categoriesRes.json()) ? await categoriesRes.json() : [];
-        setCategories(categoriesData);
+        const categoriesData = await categoriesRes.json();
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
 
         // Load products
         const productsRes = await fetch('/api/products');
@@ -83,7 +82,6 @@ export function Products() {
 
   const handleLoadMore = () => {
     setLoadingMore(true);
-    // Simulate small delay for smooth UX
     setTimeout(() => {
       setDisplayCount(prev => prev + PRODUCTS_PER_PAGE);
       setLoadingMore(false);
@@ -109,7 +107,6 @@ export function Products() {
             </p>
           </div>
           
-          {/* Skeleton Loaders */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
               <ProductSkeleton key={i} />
@@ -165,7 +162,6 @@ export function Products() {
                         </div>
                       </div>
                       
-                      {/* Badges Row - Brand and Category */}
                       <div className="flex flex-wrap gap-2 mb-3">
                         {product.brand && (
                           <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
@@ -216,7 +212,6 @@ export function Products() {
               })}
             </div>
 
-            {/* Load More Button */}
             {displayCount < allProducts.length && (
               <div className="mt-12 text-center">
                 <Button
