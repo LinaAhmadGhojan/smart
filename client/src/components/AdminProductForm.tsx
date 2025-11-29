@@ -22,20 +22,22 @@ interface Category {
   nameAr: string;
 }
 
-export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => void }) {
+export function AdminProductForm({ onProductSaved, product: initialProduct }: { onProductSaved?: () => void; product?: any }) {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [product, setProduct] = useState<Product>({
-    name: "",
-    nameAr: "",
-    brand: "SmartFlow",
-    price: "",
-    currency: "AED",
-    image: "",
-    categoryId: undefined,
-    inStock: true,
-    features: [""],
-    whatsappMessage: "",
-  });
+  const [product, setProduct] = useState<Product>(
+    initialProduct || {
+      name: "",
+      nameAr: "",
+      brand: "SmartFlow",
+      price: "",
+      currency: "AED",
+      image: "",
+      categoryId: undefined,
+      inStock: true,
+      features: [""],
+      whatsappMessage: "",
+    }
+  );
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -115,8 +117,11 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
     };
 
     try {
-      const res = await fetch("/api/products", {
-        method: "POST",
+      const method = product.id ? "PUT" : "POST";
+      const url = product.id ? `/api/products/${product.id}` : "/api/products";
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -124,7 +129,8 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
       });
 
       if (res.ok) {
-        alert("✅ تم إضافة المنتج بنجاح!");
+        const message = product.id ? "✅ تم تحديث المنتج بنجاح!" : "✅ تم إضافة المنتج بنجاح!";
+        alert(message);
         setProduct({
           name: "",
           nameAr: "",
@@ -139,7 +145,8 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
         });
         onProductSaved?.();
       } else {
-        alert("❌ خطأ في إضافة المنتج");
+        const errorMsg = product.id ? "❌ خطأ في تحديث المنتج" : "❌ خطأ في إضافة المنتج";
+        alert(errorMsg);
       }
     } catch (error) {
       console.error("Error saving product:", error);
@@ -326,7 +333,7 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
 
           {/* Submit Button */}
           <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold">
-            إضافة المنتج | Add Product
+            {product.id ? "💾 حفظ التعديلات | Save Changes" : "➕ إضافة المنتج | Add Product"}
           </Button>
         </form>
       </CardContent>
