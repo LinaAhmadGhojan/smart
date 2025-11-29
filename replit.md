@@ -10,6 +10,68 @@ The project combines a traditional business website with an interactive 3D game 
 
 Preferred communication style: Simple, everyday language.
 
+## Local Development Setup
+
+### Prerequisites
+- Node.js 18+ installed
+- PostgreSQL installed locally (or use a cloud database like Neon)
+- npm or yarn
+
+### Installation Steps
+
+1. **Clone the repository and install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Set up environment variables:**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` and configure:
+   - `DATABASE_URL`: Your PostgreSQL connection string
+   - `PORT`: Server port (default: 3000)
+   - `SESSION_SECRET`: Random string for session encryption
+
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+   
+   This will:
+   - Start the Express backend on `http://localhost:3000`
+   - Start the Vite frontend dev server
+   - Hot-reload on file changes
+
+4. **Access the application:**
+   - Open `http://localhost:3000` in your browser
+   - Admin dashboard at `http://localhost:3000/admin` (login with credentials)
+
+### Database Setup (First Time)
+
+If you have PostgreSQL installed locally:
+
+```bash
+# Create a new database
+createdb smartflow
+
+# Push schema to database
+npm run db:push
+```
+
+Or use Neon (Serverless PostgreSQL):
+- Sign up at https://neon.tech
+- Create a project and copy the `DATABASE_URL`
+- Paste it into `.env.local`
+
+### Scripts Reference
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm start` - Run production build
+- `npm run check` - Run TypeScript type checking
+- `npm run db:push` - Push database schema changes
+
 ## System Architecture
 
 ### Frontend Architecture
