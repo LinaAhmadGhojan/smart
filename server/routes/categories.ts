@@ -1,14 +1,37 @@
 import { Router, Request, Response } from "express";
-import { db } from "../db";
-import { categories } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { join } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = join(fileURLToPath(import.meta.url), "..", "..", "..");
 
 const router = Router();
 
-// Get all categories
-router.get("/", async (req: Request, res: Response) => {
+// Data directory
+const dataDir = join(__dirname, "server", "data");
+mkdirSync(dataDir, { recursive: true });
+const categoriesFile = join(dataDir, "categories.json");
+
+// Helper functions
+function loadCategories() {
   try {
-    const allCategories = await db.select().from(categories);
+    if (require("fs").existsSync(categoriesFile)) {
+      return JSON.parse(readFileSync(categoriesFile, "utf-8"));
+    }
+  } catch (error) {
+    console.error("Error loading categories:", error);
+  }
+  return [];
+}
+
+function saveCategories(categories: any[]) {
+  writeFileSync(categoriesFile, JSON.stringify(categories, null, 2));
+}
+
+// Get all categories
+router.get("/", (req: Request, res: Response) => {
+  try {
+    const allCategories = loadCategories();
     res.json(allCategories);
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -17,7 +40,7 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 // Create category
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", (req: Request, res: Response) => {
   try {
     const { name, nameAr, description } = req.body;
 
@@ -25,12 +48,20 @@ router.post("/", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Name and Arabic name are required" });
     }
 
-    const newCategory = await db
-      .insert(categories)
-      .values({ name, nameAr, description })
-      .returning();
+    const allCategories = loadCategories();
+    const newId = allCategories.length > 0 ? Math.max(...allCategories.map((c: any) => c.id)) + 1 : 1;
 
-    res.json(newCategory[0]);
+    const newCategory = {
+      id: newId,
+      name,
+      nameAr,
+      description,
+    };
+
+    allCategories.push(newCategory);
+    saveCategories(allCategories);
+
+    res.json(newCategory);
   } catch (error) {
     console.error("Error creating category:", error);
     res.status(400).json({ error: "Invalid category data" });
@@ -38,22 +69,28 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 // Update category
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", (req: Request, res: Response) => {
   try {
     const categoryId = parseInt(req.params.id);
     const { name, nameAr, description } = req.body;
 
-    const updated = await db
-      .update(categories)
-      .set({ name, nameAr, description })
-      .where(eq(categories.id, categoryId))
-      .returning();
+    const allCategories = loadCategories();
+    const categoryIndex = allCategories.findIndex((c: any) => c.id === categoryId);
 
-    if (updated.length === 0) {
+    if (categoryIndex === -1) {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    res.json(updated[0]);
+    allCategories[categoryIndex] = {
+      id: categoryId,
+      name,
+      nameAr,
+      description,
+    };
+
+    saveCategories(allCategories);
+
+    res.json(allCategories[categoryIndex]);
   } catch (error) {
     console.error("Error updating category:", error);
     res.status(400).json({ error: "Invalid category data" });
@@ -61,11 +98,18 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 // Delete category
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", (req: Request, res: Response) => {
   try {
     const categoryId = parseInt(req.params.id);
 
-    await db.delete(categories).where(eq(categories.id, categoryId));
+    const allCategories = loadCategories();
+    const filtered = allCategories.filter((c: any) => c.id !== categoryId);
+
+    if (filtered.length === allCategories.length) {
+      return res.status(404).json({ error: "Category not found" });
+    }
+
+    saveCategories(filtered);
 
     res.json({ success: true });
   } catch (error) {

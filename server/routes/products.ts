@@ -1,21 +1,21 @@
 import { Router, Request, Response } from "express";
-import { readFileSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import multer, { Multer } from "multer";
-import { db } from "../db";
-import { products } from "@shared/schema";
-import { eq } from "drizzle-orm";
 
 const __dirname = join(fileURLToPath(import.meta.url), "..", "..", "..");
 
 const router = Router();
 
+// Data directory
+const dataDir = join(__dirname, "server", "data");
+mkdirSync(dataDir, { recursive: true });
+const productsFile = join(dataDir, "products.json");
+
 // Ensure uploads directory exists
 const uploadsDir = join(__dirname, "client", "public", "uploads", "products");
-try {
-  mkdirSync(uploadsDir, { recursive: true });
-} catch (e) {}
+mkdirSync(uploadsDir, { recursive: true });
 
 // Setup multer for file uploads
 const storage = multer.diskStorage({
@@ -30,6 +30,22 @@ const storage = multer.diskStorage({
 });
 const upload: Multer = multer({ storage });
 
+// Helper functions
+function loadProducts() {
+  try {
+    if (require("fs").existsSync(productsFile)) {
+      return JSON.parse(readFileSync(productsFile, "utf-8"));
+    }
+  } catch (error) {
+    console.error("Error loading products:", error);
+  }
+  return [];
+}
+
+function saveProducts(products: any[]) {
+  writeFileSync(productsFile, JSON.stringify(products, null, 2));
+}
+
 // Upload image endpoint
 router.post("/upload", upload.single("image"), (req: Request, res: Response) => {
   const file = (req as any).file;
@@ -40,9 +56,9 @@ router.post("/upload", upload.single("image"), (req: Request, res: Response) => 
 });
 
 // Get all products
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", (req: Request, res: Response) => {
   try {
-    const allProducts = await db.select().from(products);
+    const allProducts = loadProducts();
     res.json({ products: allProducts });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -51,19 +67,17 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 // Get product by ID
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", (req: Request, res: Response) => {
   try {
     const productId = parseInt(req.params.id);
-    const product = await db
-      .select()
-      .from(products)
-      .where(eq(products.id, productId));
+    const allProducts = loadProducts();
+    const product = allProducts.find((p: any) => p.id === productId);
 
-    if (product.length === 0) {
+    if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json(product[0]);
+    res.json(product);
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({ error: "Failed to fetch product" });
@@ -71,7 +85,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 // Create product
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", (req: Request, res: Response) => {
   try {
     const { name, nameAr, brand, price, image, inStock, categoryId, features, whatsappMessage } = req.body;
 
@@ -79,22 +93,26 @@ router.post("/", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Name, Arabic name, and price are required" });
     }
 
-    const newProduct = await db
-      .insert(products)
-      .values({
-        name,
-        nameAr,
-        brand,
-        price,
-        image,
-        inStock: inStock ?? true,
-        categoryId: categoryId ? parseInt(categoryId) : undefined,
-        features: features || [],
-        whatsappMessage,
-      })
-      .returning();
+    const allProducts = loadProducts();
+    const newId = allProducts.length > 0 ? Math.max(...allProducts.map((p: any) => p.id)) + 1 : 1;
 
-    res.json(newProduct[0]);
+    const newProduct = {
+      id: newId,
+      name,
+      nameAr,
+      brand,
+      price,
+      image,
+      inStock: inStock ?? true,
+      categoryId: categoryId ? parseInt(categoryId) : undefined,
+      features: features || [],
+      whatsappMessage,
+    };
+
+    allProducts.push(newProduct);
+    saveProducts(allProducts);
+
+    res.json(newProduct);
   } catch (error) {
     console.error("Error creating product:", error);
     res.status(400).json({ error: "Invalid product data" });
@@ -102,32 +120,34 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 // Update product
-router.put("/:id", async (req: Request, res: Response) => {
+router.put("/:id", (req: Request, res: Response) => {
   try {
     const productId = parseInt(req.params.id);
     const { name, nameAr, brand, price, image, inStock, categoryId, features, whatsappMessage } = req.body;
 
-    const updated = await db
-      .update(products)
-      .set({
-        name,
-        nameAr,
-        brand,
-        price,
-        image,
-        inStock,
-        categoryId: categoryId ? parseInt(categoryId) : undefined,
-        features,
-        whatsappMessage,
-      })
-      .where(eq(products.id, productId))
-      .returning();
+    const allProducts = loadProducts();
+    const productIndex = allProducts.findIndex((p: any) => p.id === productId);
 
-    if (updated.length === 0) {
+    if (productIndex === -1) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json(updated[0]);
+    allProducts[productIndex] = {
+      id: productId,
+      name,
+      nameAr,
+      brand,
+      price,
+      image,
+      inStock,
+      categoryId: categoryId ? parseInt(categoryId) : undefined,
+      features,
+      whatsappMessage,
+    };
+
+    saveProducts(allProducts);
+
+    res.json(allProducts[productIndex]);
   } catch (error) {
     console.error("Error updating product:", error);
     res.status(400).json({ error: "Invalid product data" });
@@ -135,11 +155,18 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 // Delete product
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", (req: Request, res: Response) => {
   try {
     const productId = parseInt(req.params.id);
 
-    await db.delete(products).where(eq(products.id, productId));
+    const allProducts = loadProducts();
+    const filtered = allProducts.filter((p: any) => p.id !== productId);
+
+    if (filtered.length === allProducts.length) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    saveProducts(filtered);
 
     res.json({ success: true });
   } catch (error) {

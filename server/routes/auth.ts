@@ -1,25 +1,49 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { db } from "../db";
-import { admins } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { join } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = join(fileURLToPath(import.meta.url), "..", "..", "..");
 
 const router = Router();
 
-// Initialize default admin if doesn't exist
-async function initializeAdmin() {
-  try {
-    const existingAdmin = await db
-      .select()
-      .from(admins)
-      .where(eq(admins.email, "admin@smartflow.com"));
+// Data directory
+const dataDir = join(__dirname, "server", "data");
+mkdirSync(dataDir, { recursive: true });
+const adminsFile = join(dataDir, "admins.json");
 
-    if (existingAdmin.length === 0) {
-      const hashedPassword = await bcrypt.hash("SmartFlow123!", 10);
-      await db.insert(admins).values({
+// Helper functions
+function loadAdmins() {
+  try {
+    if (require("fs").existsSync(adminsFile)) {
+      return JSON.parse(readFileSync(adminsFile, "utf-8"));
+    }
+  } catch (error) {
+    console.error("Error loading admins:", error);
+  }
+  return [];
+}
+
+function saveAdmins(admins: any[]) {
+  writeFileSync(adminsFile, JSON.stringify(admins, null, 2));
+}
+
+// Initialize default admin if doesn't exist
+function initializeAdmin() {
+  try {
+    const admins = loadAdmins();
+    const existingAdmin = admins.find((a: any) => a.email === "admin@smartflow.com");
+
+    if (!existingAdmin) {
+      const hashedPassword = bcrypt.hashSync("SmartFlow123!", 10);
+      const newAdmin = {
+        id: admins.length > 0 ? Math.max(...admins.map((a: any) => a.id)) + 1 : 1,
         email: "admin@smartflow.com",
         password: hashedPassword,
-      });
+      };
+      admins.push(newAdmin);
+      saveAdmins(admins);
       console.log("Default admin created: admin@smartflow.com");
     }
   } catch (error) {
@@ -31,7 +55,7 @@ async function initializeAdmin() {
 initializeAdmin();
 
 // Admin Login endpoint
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -39,18 +63,14 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "البريد وكلمة السر مطلوبة" });
     }
 
-    const adminArray = await db
-      .select()
-      .from(admins)
-      .where(eq(admins.email, email));
-
-    const admin = adminArray[0];
+    const admins = loadAdmins();
+    const admin = admins.find((a: any) => a.email === email);
 
     if (!admin) {
       return res.status(401).json({ error: "البريد أو كلمة السر غير صحيحة" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    const isPasswordValid = bcrypt.compareSync(password, admin.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ error: "البريد أو كلمة السر غير صحيحة" });
@@ -64,7 +84,7 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 // Admin Register endpoint (for adding new admins)
-router.post("/register-admin", async (req: Request, res: Response) => {
+router.post("/register-admin", (req: Request, res: Response) => {
   try {
     const { email, password, adminKey } = req.body;
 
@@ -77,26 +97,24 @@ router.post("/register-admin", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "البريد وكلمة السر مطلوبة" });
     }
 
-    const existingAdmin = await db
-      .select()
-      .from(admins)
-      .where(eq(admins.email, email));
+    const admins = loadAdmins();
+    const existingAdmin = admins.find((a: any) => a.email === email);
 
-    if (existingAdmin.length > 0) {
+    if (existingAdmin) {
       return res.status(400).json({ error: "هذا البريد مسجل بالفعل" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    const newAdmin = {
+      id: admins.length > 0 ? Math.max(...admins.map((a: any) => a.id)) + 1 : 1,
+      email,
+      password: hashedPassword,
+    };
 
-    const newAdmin = await db
-      .insert(admins)
-      .values({
-        email,
-        password: hashedPassword,
-      })
-      .returning();
+    admins.push(newAdmin);
+    saveAdmins(admins);
 
-    res.json({ success: true, message: "تم إنشاء حساب الإدمن بنجاح", admin: newAdmin[0] });
+    res.json({ success: true, message: "تم إنشاء حساب الإدمن بنجاح", admin: newAdmin });
   } catch (error) {
     console.error("Register error:", error);
     res.status(500).json({ error: "خطأ في التسجيل" });
