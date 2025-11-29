@@ -10,7 +10,6 @@ interface Product {
   nameAr: string;
   brand: string;
   price: string;
-  currency: string;
   image: string;
   inStock: boolean;
   categoryId?: number;
@@ -177,7 +176,7 @@ export function Products() {
                       </div>
 
                       <div className="text-2xl font-bold text-green-600">
-                        {product.price} <span className="text-lg">{product.currency || 'AED'}</span>
+                        {product.price}
                       </div>
                     </CardHeader>
 

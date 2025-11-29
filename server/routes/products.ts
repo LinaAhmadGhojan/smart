@@ -87,7 +87,7 @@ router.get("/:id", (req: Request, res: Response) => {
 // Create product
 router.post("/", (req: Request, res: Response) => {
   try {
-    const { name, nameAr, brand, price, currency, image, inStock, categoryId, features, whatsappMessage } = req.body;
+    const { name, nameAr, brand, price, image, inStock, categoryId, features, whatsappMessage } = req.body;
 
     if (!name || !nameAr || !price) {
       return res.status(400).json({ error: "Name, Arabic name, and price are required" });
@@ -102,7 +102,6 @@ router.post("/", (req: Request, res: Response) => {
       nameAr,
       brand,
       price,
-      currency: currency || "AED",
       image,
       inStock: inStock ?? true,
       categoryId: categoryId ? parseInt(categoryId) : undefined,
@@ -124,7 +123,7 @@ router.post("/", (req: Request, res: Response) => {
 router.put("/:id", (req: Request, res: Response) => {
   try {
     const productId = parseInt(req.params.id);
-    const { name, nameAr, brand, price, currency, image, inStock, categoryId, features, whatsappMessage } = req.body;
+    const { name, nameAr, brand, price, image, inStock, categoryId, features, whatsappMessage } = req.body;
 
     const allProducts = loadProducts();
     const productIndex = allProducts.findIndex((p: any) => p.id === productId);
@@ -139,7 +138,6 @@ router.put("/:id", (req: Request, res: Response) => {
       nameAr,
       brand,
       price,
-      currency: currency || "AED",
       image,
       inStock,
       categoryId: categoryId ? parseInt(categoryId) : undefined,

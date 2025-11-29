@@ -8,7 +8,6 @@ interface Product {
   nameAr: string;
   brand: string;
   price: string;
-  currency: string;
   image: string;
   categoryId?: number;
   inStock: boolean;
@@ -30,7 +29,6 @@ export function AdminProductForm({ onProductSaved, product: initialProduct }: { 
       nameAr: "",
       brand: "SmartFlow",
       price: "",
-      currency: "AED",
       image: "",
       categoryId: undefined,
       inStock: true,
@@ -136,7 +134,6 @@ export function AdminProductForm({ onProductSaved, product: initialProduct }: { 
           nameAr: "",
           brand: "SmartFlow",
           price: "",
-          currency: "AED",
           image: "",
           categoryId: undefined,
           inStock: true,
@@ -155,94 +152,83 @@ export function AdminProductForm({ onProductSaved, product: initialProduct }: { 
   };
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>إضافة منتج جديد | Add New Product</CardTitle>
+    <Card className="w-full">
+      <CardHeader className="bg-blue-50 border-b-2 border-blue-200">
+        <CardTitle className="text-2xl">
+          {product.id ? "تعديل المنتج | Edit Product" : "+ منتج جديد | Add New Product"}
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* English Name */}
           <div>
-            <label className="block text-sm font-medium mb-2">Product Name (English)</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">اسم المنتج (إنجليزي)</label>
             <input
               type="text"
               name="name"
               value={product.name}
               onChange={handleInputChange}
-              placeholder="e.g. Automatic Gate System"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Product Name"
+              className="w-full px-4 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
           {/* Arabic Name */}
           <div>
-            <label className="block text-sm font-medium mb-2">اسم المنتج (عربي)</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">اسم المنتج (عربي)</label>
             <input
               type="text"
               name="nameAr"
               value={product.nameAr}
               onChange={handleInputChange}
-              placeholder="مثال: نظام البوابة الأوتوماتيكية"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="اسم المنتج"
+              className="w-full px-4 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
 
           {/* Brand */}
           <div>
-            <label className="block text-sm font-medium mb-2">Brand</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">العلامة التجارية</label>
             <input
               type="text"
               name="brand"
               value={product.brand}
               onChange={handleInputChange}
-              placeholder="e.g. SmartFlow"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Brand"
+              className="w-full px-4 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          {/* Price & Currency */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Price</label>
-              <input
-                type="text"
-                name="price"
-                value={product.price}
-                onChange={handleInputChange}
-                placeholder="e.g. 2,500.00"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Currency</label>
-              <input
-                type="text"
-                name="currency"
-                value={product.currency}
-                onChange={handleInputChange}
-                placeholder="AED"
-                maxLength={3}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          {/* Price with Currency */}
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">السعر</label>
+            <input
+              type="text"
+              name="price"
+              value={product.price}
+              onChange={handleInputChange}
+              placeholder="2,000.00 AED"
+              className="w-full px-4 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">مثال: 2,000.00 AED</p>
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-sm font-medium mb-2">Category</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">الفئة</label>
             <select
               name="categoryId"
               value={product.categoryId || ""}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select Category</option>
+              <option value="">-- اختر فئة (اختياري) --</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.name} - {cat.nameAr}
+                  {cat.nameAr} ({cat.name})
                 </option>
               ))}
             </select>
@@ -250,21 +236,21 @@ export function AdminProductForm({ onProductSaved, product: initialProduct }: { 
 
           {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium mb-2">Product Image</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">📷 الصورة</label>
             <input
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border-2 rounded-lg"
             />
             {product.image && (
               <div className="mt-2">
                 <img
                   src={product.image}
                   alt="Product preview"
-                  className="w-32 h-32 object-contain border rounded-lg"
+                  className="w-24 h-24 object-contain border rounded-lg"
                 />
-                <p className="text-xs text-gray-500 mt-1">Image URL: {product.image}</p>
+                <p className="text-xs text-gray-500 mt-1">✅ تم رفع الصورة</p>
               </div>
             )}
           </div>
@@ -272,7 +258,7 @@ export function AdminProductForm({ onProductSaved, product: initialProduct }: { 
           {/* Features - DYNAMIC */}
           <div>
             <div className="flex justify-between items-center mb-4">
-              <label className="block text-sm font-bold">✨ Features (المميزات)</label>
+              <label className="block text-sm font-bold text-gray-900">✨ المميزات</label>
               <Button
                 type="button"
                 onClick={addFeature}
@@ -290,7 +276,7 @@ export function AdminProductForm({ onProductSaved, product: initialProduct }: { 
                     value={feature}
                     onChange={(e) => handleFeatureChange(index, e.target.value)}
                     placeholder={`Feature ${index + 1} / الميزة ${index + 1}`}
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-4 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   {product.features.length > 1 && (
                     <Button
@@ -308,32 +294,32 @@ export function AdminProductForm({ onProductSaved, product: initialProduct }: { 
 
           {/* WhatsApp Message */}
           <div>
-            <label className="block text-sm font-medium mb-2">WhatsApp Message (Arabic)</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">رسالة واتساب</label>
             <textarea
               name="whatsappMessage"
               value={product.whatsappMessage}
               onChange={handleInputChange}
               placeholder="مثال: مرحباً، أنا مهتم بهذا المنتج"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-4 py-2 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               rows={3}
             />
           </div>
 
           {/* In Stock */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
             <input
               type="checkbox"
               name="inStock"
               checked={product.inStock}
               onChange={handleInputChange}
-              className="w-4 h-4 cursor-pointer"
+              className="w-5 h-5 cursor-pointer"
             />
-            <label className="text-sm font-medium cursor-pointer">In Stock ✅</label>
+            <label className="text-sm font-medium cursor-pointer">متوفر في المخزن ✅</label>
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold">
-            {product.id ? "💾 حفظ التعديلات | Save Changes" : "➕ إضافة المنتج | Add Product"}
+          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold text-lg">
+            {product.id ? "💾 حفظ التعديلات" : "➕ إضافة المنتج"}
           </Button>
         </form>
       </CardContent>
