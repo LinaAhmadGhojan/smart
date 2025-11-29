@@ -33,7 +33,7 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
     image: "",
     categoryId: undefined,
     inStock: true,
-    features: ["", "", ""],
+    features: [""],
     whatsappMessage: "",
   });
 
@@ -67,6 +67,20 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
     }));
   };
 
+  const addFeature = () => {
+    setProduct((prev) => ({
+      ...prev,
+      features: [...prev.features, ""],
+    }));
+  };
+
+  const removeFeature = (index: number) => {
+    setProduct((prev) => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -84,8 +98,10 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
         ...prev,
         image: data.image,
       }));
+      alert("✅ تم رفع الصورة بنجاح!");
     } catch (error) {
       console.error("Error uploading image:", error);
+      alert("❌ خطأ في رفع الصورة");
     }
   };
 
@@ -118,7 +134,7 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
           image: "",
           categoryId: undefined,
           inStock: true,
-          features: ["", "", ""],
+          features: [""],
           whatsappMessage: "",
         });
         onProductSaved?.();
@@ -246,19 +262,41 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
             )}
           </div>
 
-          {/* Features */}
+          {/* Features - DYNAMIC */}
           <div>
-            <label className="block text-sm font-medium mb-2">Features (3 maximum)</label>
-            {product.features.map((feature, index) => (
-              <input
-                key={index}
-                type="text"
-                value={feature}
-                onChange={(e) => handleFeatureChange(index, e.target.value)}
-                placeholder={`Feature ${index + 1}`}
-                className="w-full px-4 py-2 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            ))}
+            <div className="flex justify-between items-center mb-4">
+              <label className="block text-sm font-bold">✨ Features (المميزات)</label>
+              <Button
+                type="button"
+                onClick={addFeature}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1"
+              >
+                + إضافة ميزة
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {product.features.map((feature, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={feature}
+                    onChange={(e) => handleFeatureChange(index, e.target.value)}
+                    placeholder={`Feature ${index + 1} / الميزة ${index + 1}`}
+                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {product.features.length > 1 && (
+                    <Button
+                      type="button"
+                      onClick={() => removeFeature(index)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3"
+                    >
+                      حذف
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* WhatsApp Message */}
@@ -283,7 +321,7 @@ export function AdminProductForm({ onProductSaved }: { onProductSaved?: () => vo
               onChange={handleInputChange}
               className="w-4 h-4 cursor-pointer"
             />
-            <label className="text-sm font-medium cursor-pointer">In Stock</label>
+            <label className="text-sm font-medium cursor-pointer">In Stock ✅</label>
           </div>
 
           {/* Submit Button */}
