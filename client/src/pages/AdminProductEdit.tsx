@@ -231,6 +231,55 @@ export function AdminProductEdit({ product, onBack, onSave, onLogout }: AdminPro
                 )}
               </div>
 
+              {/* Features - DYNAMIC */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <label className="block font-bold text-blue-900">✨ المميزات</label>
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        features: [...formData.features, ""],
+                      })
+                    }
+                    className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1"
+                  >
+                    + إضافة ميزة
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  {formData.features.map((feature, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={feature}
+                        onChange={(e) => {
+                          const newFeatures = [...formData.features];
+                          newFeatures[index] = e.target.value;
+                          setFormData({ ...formData, features: newFeatures });
+                        }}
+                        placeholder={`Feature ${index + 1} / الميزة ${index + 1}`}
+                        className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                      />
+                      {formData.features.length > 1 && (
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            const newFeatures = formData.features.filter((_, i) => i !== index);
+                            setFormData({ ...formData, features: newFeatures });
+                          }}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3"
+                        >
+                          حذف
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* WhatsApp Message */}
               <div>
                 <label className="block font-bold mb-2 text-blue-900">
