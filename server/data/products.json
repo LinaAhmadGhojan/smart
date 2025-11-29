@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Automatic Sliding Gate System",
+    "nameAr": "نظام البوابة المنزلقة الأوتوماتيكية",
+    "brand": "SmartFlow",
+    "price": 2500,
+    "image": "/uploads/products/gate1.jpg",
+    "inStock": true,
+    "categoryId": 1,
+    "features": ["صامت جداً", "آمن", "سهل التركيب"],
+    "whatsappMessage": "أرغب بمعلومات عن نظام البوابة المنزلقة"
+  },
+  {
+    "id": 2,
+    "name": "Smart Door Lock",
+    "nameAr": "القفل الذكي",
+    "brand": "SmartFlow",
+    "price": 450,
+    "image": "/uploads/products/lock1.jpg",
+    "inStock": true,
+    "categoryId": 2,
+    "features": ["بصمة يد", "كود رقمي", "تحكم من الهاتف"],
+    "whatsappMessage": "أرغب بمعلومات عن القفل الذكي"
+  },
+  {
+    "id": 3,
+    "name": "Garage Door Opener",
+    "nameAr": "فتاحة باب الجراج",
+    "brand": "SmartFlow",
+    "price": 1200,
+    "image": "/uploads/products/garage1.jpg",
+    "inStock": true,
+    "categoryId": 3,
+    "features": ["تحكم من المنزل", "آمن تماماً"],
+    "whatsappMessage": "أرغب بمعلومات عن فتاحة باب الجراج"
+  }
+]

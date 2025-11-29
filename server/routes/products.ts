@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import multer, { Multer } from "multer";
@@ -33,7 +33,7 @@ const upload: Multer = multer({ storage });
 // Helper functions
 function loadProducts() {
   try {
-    if (require("fs").existsSync(productsFile)) {
+    if (existsSync(productsFile)) {
       return JSON.parse(readFileSync(productsFile, "utf-8"));
     }
   } catch (error) {

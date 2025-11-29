@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 
@@ -16,7 +16,7 @@ const adminsFile = join(dataDir, "admins.json");
 // Helper functions
 function loadAdmins() {
   try {
-    if (require("fs").existsSync(adminsFile)) {
+    if (existsSync(adminsFile)) {
       return JSON.parse(readFileSync(adminsFile, "utf-8"));
     }
   } catch (error) {

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 
@@ -15,7 +15,7 @@ const categoriesFile = join(dataDir, "categories.json");
 // Helper functions
 function loadCategories() {
   try {
-    if (require("fs").existsSync(categoriesFile)) {
+    if (existsSync(categoriesFile)) {
       return JSON.parse(readFileSync(categoriesFile, "utf-8"));
     }
   } catch (error) {

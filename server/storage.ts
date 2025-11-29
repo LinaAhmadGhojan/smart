@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 import type { User, InsertUser } from "@shared/schema";
@@ -27,7 +27,7 @@ export class FileStorage implements IStorage {
 
   private loadUsers() {
     try {
-      if (require("fs").existsSync(usersFile)) {
+      if (existsSync(usersFile)) {
         const data = readFileSync(usersFile, "utf-8");
         this.users = JSON.parse(data);
         this.currentId = Math.max(...this.users.map(u => u.id), 0) + 1;
