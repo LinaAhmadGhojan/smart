@@ -9,9 +9,10 @@
     "inStock": true,
     "categoryId": 1,
     "features": [
-      "صامت جداً",
-      "آمن",
-      "سهل التركيب"
+      "Quiet operation - صامت جداً",
+      "Automatic safety sensors - مستشعرات أمان",
+      "Easy installation - سهل التركيب",
+      "Weather resistant - مقاوم للطقس"
     ],
     "whatsappMessage": "أرغب بمعلومات عن نظام البوابة المنزلقة"
   },
@@ -25,9 +26,10 @@
     "inStock": true,
     "categoryId": 2,
     "features": [
-      "بصمة يد",
-      "كود رقمي",
-      "تحكم من الهاتف"
+      "Fingerprint recognition - بصمة يد",
+      "Digital code access - كود رقمي",
+      "Mobile app control - تحكم من الهاتف",
+      "Emergency backup key - مفتاح احتياطي"
     ],
     "whatsappMessage": "أرغب بمعلومات عن القفل الذكي"
   },
@@ -41,9 +43,62 @@
     "inStock": true,
     "categoryId": 3,
     "features": [
-      "تحكم من المنزل",
-      "آمن تماماً"
+      "Home remote control - تحكم من المنزل",
+      "Security system integration - تكامل مع أنظمة الأمان",
+      "Durable motor - محرك قوي ومتين",
+      "Quick installation - تركيب سريع"
     ],
     "whatsappMessage": "أرغب بمعلومات عن فتاحة باب الجراج"
+  },
+  {
+    "id": 4,
+    "name": "Smart Lighting System",
+    "nameAr": "نظام إضاءة ذكي",
+    "brand": "SmartFlow",
+    "price": "1,500.00 AED",
+    "image": "/uploads/products/smart-lighting.jpeg",
+    "inStock": true,
+    "categoryId": 1,
+    "features": [
+      "Automated lighting control - تحكم آلي في الإضاءة",
+      "Energy efficient LED - إضاءة LED موفرة للطاقة",
+      "Programmable schedules - جداول زمنية قابلة للبرمجة",
+      "Remote access via app - التحكم عن بعد"
+    ],
+    "whatsappMessage": "مرحباً، أنا مهتم بنظام الإضاءة الذكي"
+  },
+  {
+    "id": 5,
+    "name": "Security Camera System",
+    "nameAr": "نظام كاميرات المراقبة",
+    "brand": "SmartFlow",
+    "price": "2,800.00 AED",
+    "image": "/uploads/products/security-camera.jpeg",
+    "inStock": true,
+    "categoryId": 2,
+    "features": [
+      "4K ultra HD recording - تسجيل بدقة 4K",
+      "Night vision technology - رؤية ليلية",
+      "Cloud storage - تخزين سحابي",
+      "Motion detection alerts - تنبيهات الحركة"
+    ],
+    "whatsappMessage": "أرغب بمعلومات عن نظام كاميرات المراقبة"
+  },
+  {
+    "id": 6,
+    "name": "Home Automation Hub",
+    "nameAr": "مركز تحكم المنزل الذكي",
+    "brand": "SmartFlow",
+    "price": "3,200.00 AED",
+    "image": "/uploads/products/automation-hub.jpeg",
+    "inStock": true,
+    "categoryId": 1,
+    "features": [
+      "Control all devices - التحكم بجميع الأجهزة",
+      "Voice command support - دعم الأوامر الصوتية",
+      "AI-powered scheduling - جدولة ذكية بالذكاء الاصطناعي",
+      "Real-time monitoring - المراقبة المباشرة"
+    ],
+    "whatsappMessage": "أنا مهتم بمركز تحكم المنزل الذكي"
   }
 ]
